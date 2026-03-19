@@ -1,0 +1,25 @@
+{
+  "clientId": "",
+  "guildId": "",
+  "allowedChannels": [],
+  "api": {
+    "baseUrl": "https://api.accsaberreloaded.com/v1",
+    "cacheTtlMs": 3600000
+  },
+  "roles": {
+    "player": "",
+    "levelTiers": {
+      "newcomer": "",
+      "apprentice": "",
+      "adept": "",
+      "skilled": "",
+      "expert": "",
+      "master": "",
+      "grandmaster": "",
+      "legend": "",
+      "transcendent": "",
+      "mythic": "",
+      "ascendant": ""
+    }
+  }
+}
