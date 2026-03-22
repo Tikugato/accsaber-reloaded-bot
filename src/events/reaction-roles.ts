@@ -23,10 +23,17 @@ async function resolveReaction(reaction: MessageReaction | PartialMessageReactio
 
 export async function publishRoleMessage(client: ArBot): Promise<void> {
   const rc = config.reactionRoles;
-  if (!rc || !rc.channelId) return;
+  if (!rc || !rc.channelId) {
+    console.warn("[ReactionRoles] No reactionRoles config or channelId — skipping");
+    return;
+  }
 
+  console.log(`[ReactionRoles] Fetching channel ${rc.channelId}...`);
   const channel = await client.channels.fetch(rc.channelId);
-  if (!channel || !channel.isTextBased() || channel.isDMBased()) return;
+  if (!channel || !channel.isTextBased() || channel.isDMBased()) {
+    console.warn(`[ReactionRoles] Channel ${rc.channelId} not found or not a text channel`);
+    return;
+  }
 
   const lines = Object.values(rc.roles).map(
     (r) => `${r.emoji}  —  **${r.label}**`
