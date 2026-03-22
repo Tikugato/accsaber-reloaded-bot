@@ -7,6 +7,10 @@ export default {
   once: true,
   async execute(client: ArBot) {
     console.log(`Ready as ${client.user?.tag}`);
-    await publishRoleMessage(client);
+    try {
+      await publishRoleMessage(client);
+    } catch (err) {
+      console.error("[ReactionRoles] Failed to publish role message:", err);
+    }
   },
 };
