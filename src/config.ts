@@ -1,20 +1,11 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Config } from "./types/config.js";
 
 const configPath = resolve(process.cwd(), "config.json");
 
 function loadConfig(): Config {
-  let raw: string;
-
-  if (process.env.CONFIG_JSON) {
-    raw = process.env.CONFIG_JSON;
-  } else if (existsSync(configPath)) {
-    raw = readFileSync(configPath, "utf-8");
-  } else {
-    throw new Error("No config found. Set CONFIG_JSON env var or provide config.json");
-  }
-
+  const raw = readFileSync(configPath, "utf-8");
   const parsed = JSON.parse(raw) as Config;
 
   const required: string[] = [];

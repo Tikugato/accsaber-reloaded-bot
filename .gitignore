@@ -88,7 +88,6 @@ desktop.ini
 # ==========================================
 # 9. Project-Specific Ignores (EDIT HERE!)
 # ==========================================
-config.json
 
 # Only ignoring markdown files that aren't the README for now
 *.md*

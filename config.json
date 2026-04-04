@@ -1,0 +1,99 @@
+{
+  "clientId": "1482115372206395434",
+  "guildId": "1481714922533683202",
+  "allowedChannels": ["1483599131909034146", "1482754208452055290"],
+  "api": {
+    "baseUrl": "https://api.accsaberreloaded.com/v1",
+    "cacheTtlMs": 3600000
+  },
+  "roles": {
+    "player": "1483540679773651086",
+    "levelTiers": {
+      "newcomer": "1483606472372785282",
+      "apprentice": "1483606692548841723",
+      "adept": "1483606856973946921",
+      "skilled": "1483606989803360297",
+      "expert": "1483967899273134284",
+      "master": "1483968011277959208",
+      "grandmaster": "1483968100326969344",
+      "legend": "1483968204979175566",
+      "transcendent": "1483968326852939937",
+      "mythic": "1483968401759146124",
+      "ascendant": "1483968488115798066"
+    }
+  },
+  "scoreFeed": {
+    "channelId": "1489213732817997996",
+    "reconnectIntervalMs": 5000,
+    "firstMilestone": {
+      "enabled": true,
+      "embedColor": "#ffd700",
+      "thresholds": [
+        { "ap": 700, "enabled": true, "messageTemplate": "{playerName} just set their first 700+ AP score with {ap} AP ({accuracy}%) on {songName}!" },
+        { "ap": 800, "enabled": true, "messageTemplate": "{playerName} just set their first 800+ AP score with {ap} AP ({accuracy}%) on {songName}!" },
+        { "ap": 900, "enabled": true, "messageTemplate": "{playerName} just set their first 900+ AP score with {ap} AP ({accuracy}%) on {songName}!" },
+        { "ap": 1000, "enabled": true, "messageTemplate": "{playerName} just set their first 1000+ AP score with {ap} AP ({accuracy}%) on {songName}!" }
+      ]
+    },
+    "allScoresAbove": {
+      "enabled": true,
+      "apThreshold": 1060,
+      "embedColor": "#ef4444",
+      "messageTemplate": "{playerName} just set a {ap} AP ({accuracy}%) score on {songName}!"
+    },
+    "underdog": {
+      "enabled": true,
+      "embedColor": "#22c55e",
+      "mapRankThreshold": 5,
+      "minCategoryRank": 50,
+      "messageTemplate": "{playerName} (rank #{categoryRank}) just got #{rank} on {songName} with {ap} AP ({accuracy}%)!"
+    },
+    "rankOne": {
+      "enabled": true,
+      "embedColor": "#ffd700",
+      "messageTemplate": "{playerName} just got #1 on {songName} with {ap} AP ({accuracy}%)!"
+    },
+    "topRank": {
+      "enabled": true,
+      "embedColor": "#3b82f6",
+      "thresholds": [
+        { "rank": 10, "enabled": true, "messageTemplate": "{playerName} entered the top 10 on {songName} with {ap} AP ({accuracy}%)!" },
+        { "rank": 25, "enabled": true, "messageTemplate": "{playerName} entered the top 25 on {songName} with {ap} AP ({accuracy}%)!" },
+        { "rank": 50, "enabled": true, "messageTemplate": "{playerName} entered the top 50 on {songName} with {ap} AP ({accuracy}%)!" },
+        { "rank": 100, "enabled": true, "messageTemplate": "{playerName} entered the top 100 on {songName} with {ap} AP ({accuracy}%)!" },
+        { "rank": 200, "enabled": true, "messageTemplate": "{playerName} entered the top 200 on {songName} with {ap} AP ({accuracy}%)!" },
+        { "rank": 300, "enabled": true, "messageTemplate": "{playerName} entered the top 300 on {songName} with {ap} AP ({accuracy}%)!" }
+      ]
+    },
+    "streak": {
+      "enabled": true,
+      "embedColor": "#a855f7",
+      "categoryThresholds": [
+        { "categoryCode": "tech_acc", "threshold": 9 },
+        { "categoryCode": "standard_acc", "threshold": 9 },
+        { "categoryCode": "true_acc", "threshold": 12 }
+      ],
+      "messageTemplate": "{playerName} hit a {streak115} note 115 streak on {songName} ({categoryName})!"
+    }
+  },
+  "reactionRoles": {
+    "channelId": "1484645896997175507",
+    "roles": {
+      "updates": {
+        "emoji": "📢",
+        "roleId": "1485089545073590363",
+        "label": "Site Updates"
+      },
+      "devFeeds": {
+        "emoji": "🛠️",
+        "roleId": "1485089644680057043",
+        "label": "Dev Updates"
+      },
+      "rankingUpdates": {
+        "emoji": "🗺️",
+        "roleId": "1485089681312976996",
+        "label": "Ranking Updates"
+      }
+    }
+  }
+}
