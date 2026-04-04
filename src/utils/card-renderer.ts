@@ -379,7 +379,13 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
       txStart, botLineY
     );
 
-    const rightText = `${acc}%  |  ${ap}ap${isFC ? "  FC" : ""}`;
+    const rankText = `#${score.rank}`;
+    const rankColor = score.rank === 1 ? "#ffd700"
+      : score.rank === 2 ? "#c0c0c0"
+      : score.rank === 3 ? "#cd7f32"
+      : TEXT_TERTIARY;
+
+    const rightText = `${acc}%  |  ${ap}ap${isFC ? "  FC" : ""}  ${rankText}`;
     ctx.font = `500 13px ${MONO}`;
     const rightW = ctx.measureText(rightText).width;
     const rightX = cardX + cardW - 32 - rightW;
@@ -388,10 +394,16 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     ctx.fillText(rightText, rightX, topLineY + 1);
 
     if (isFC) {
-      const fcX = cardX + cardW - 32 - ctx.measureText("FC").width;
+      const fcPartW = ctx.measureText(`  ${rankText}`).width;
+      const fcX = cardX + cardW - 32 - ctx.measureText(`FC  ${rankText}`).width;
       ctx.fillStyle = SUCCESS;
       ctx.fillText("FC", fcX, topLineY + 1);
     }
+
+    ctx.fillStyle = rankColor;
+    ctx.font = `700 13px ${MONO}`;
+    const rankW = ctx.measureText(rankText).width;
+    ctx.fillText(rankText, cardX + cardW - 32 - rankW, topLineY + 1);
 
     const wapText = `(${score.weightedAp.toFixed(2)} weighted)`;
     ctx.font = `400 11px ${MONO}`;
