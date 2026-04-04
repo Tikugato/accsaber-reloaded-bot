@@ -120,7 +120,7 @@ async function fetchImage(url: string): Promise<ReturnType<typeof loadImage>> {
 }
 
 const W = 900;
-const H = 540;
+const H = 570;
 
 export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> {
   registerFonts();
@@ -305,11 +305,11 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
   ctx.fillText("TOP SCORES", statsStartX, scoresY);
   ctx.letterSpacing = "0px";
 
-  const scoreLineH = 28;
+  const scoreLineH = 40;
   const scoreStartY = scoresY + 26;
   const scoreMaxW = cardW - 64;
 
-  for (let i = 0; i < data.topScores.length && i < 3; i++) {
+  for (let i = 0; i < data.topScores.length && i < 5; i++) {
     const score = data.topScores[i];
     const sy = scoreStartY + i * scoreLineH;
     const diff = formatDifficulty(score.difficulty);
@@ -335,6 +335,13 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     ctx.font = `500 11px ${MONO}`;
     ctx.fillStyle = TEXT_SECONDARY;
     ctx.fillText(`[${diff}]`, statsStartX + 28 + songW + 6, sy + 2);
+
+    ctx.font = `400 11px ${SANS}`;
+    ctx.fillStyle = TEXT_TERTIARY;
+    ctx.fillText(
+      `${score.songAuthor} · Mapped by ${score.mapAuthor}`,
+      statsStartX + 28, sy + 18
+    );
 
     const rightText = `${acc}%  |  ${ap}ap${isFC ? "  FC" : ""}`;
     ctx.font = `500 13px ${MONO}`;

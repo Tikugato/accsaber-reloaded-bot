@@ -64,13 +64,28 @@ const get: Command = {
       }
     }
 
+    const categories = await getCategories();
+    const categoryIdToCode: Record<string, string> = {};
+    for (const cat of categories) {
+      categoryIdToCode[cat.id] = cat.code;
+    }
+    const targetCat = categories.find((c) => c.code === categoryCode);
+
+    const scoresParams: { size: number; sort: string; categoryId?: string } = {
+      size: 5,
+      sort: "weightedAp,desc",
+    };
+    if (targetCat && categoryCode !== "overall") {
+      scoresParams.categoryId = targetCat.id;
+    }
+
     const [userResult, levelResult, allStatsResult, diffResult, scoresResult] =
       await Promise.allSettled([
         getUser(userId),
         getUserLevel(userId),
         getUserAllStatistics(userId),
         getUserStatsDiff(userId, categoryCode),
-        getUserScores(userId, { size: 3, sort: "weightedAp,desc" }),
+        getUserScores(userId, scoresParams),
       ]);
 
     if (userResult.status === "rejected") {
@@ -109,13 +124,6 @@ const get: Command = {
     const scores =
       scoresResult.status === "fulfilled" ? scoresResult.value : undefined;
 
-    const categories = await getCategories();
-    const categoryIdToCode: Record<string, string> = {};
-    for (const cat of categories) {
-      categoryIdToCode[cat.id] = cat.code;
-    }
-
-    const targetCat = categories.find((c) => c.code === categoryCode);
     const categoryStats = allStats?.categories.find(
       (s) => s.categoryId === targetCat?.id
     );
