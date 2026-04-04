@@ -120,7 +120,7 @@ async function fetchImage(url: string): Promise<ReturnType<typeof loadImage>> {
 }
 
 const W = 900;
-const H = 600;
+const H = 620;
 
 export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> {
   registerFonts();
@@ -305,15 +305,18 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
   ctx.fillText("TOP SCORES", statsStartX, scoresY);
   ctx.letterSpacing = "0px";
 
-  const coverSize = 32;
-  const scoreLineH = 42;
+  const coverSize = 34;
+  const glowPad = 4;
+  const scoreLineH = 44;
   const scoreStartY = scoresY + 26;
-  const textOffsetX = 28 + coverSize + 8;
+  const txStart = statsStartX + 28 + coverSize + glowPad * 2 + 8;
   const scoreMaxW = cardW - 64;
 
   for (let i = 0; i < data.topScores.length && i < 5; i++) {
     const score = data.topScores[i];
-    const sy = scoreStartY + i * scoreLineH;
+    const rowY = scoreStartY + i * scoreLineH;
+    const coverX = statsStartX + 28;
+    const coverY = rowY + Math.floor((scoreLineH - coverSize) / 2) - 2;
     const diff = formatDifficulty(score.difficulty);
     const acc = (score.accuracy * 100).toFixed(2);
     const ap = score.ap.toFixed(2);
@@ -322,43 +325,58 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     const scoreCatColor = CATEGORY_HEX[data.categoryIdToCode[score.categoryId]] ?? accent;
     ctx.font = `700 14px ${MONO}`;
     ctx.fillStyle = scoreCatColor;
-    ctx.fillText(`${i + 1}.`, statsStartX, sy + 10);
+    ctx.textBaseline = "middle";
+    ctx.fillText(`${i + 1}.`, statsStartX, coverY + coverSize / 2);
+    ctx.textBaseline = "top";
 
-    const coverX = statsStartX + 28;
-    const coverY = sy + 2;
-    drawRoundedRect(ctx, coverX, coverY, coverSize, coverSize, 4, BG_OVERLAY);
+    let coverImg: Awaited<ReturnType<typeof loadImage>> | null = null;
     if (score.coverUrl) {
-      try {
-        const coverImg = await fetchImage(score.coverUrl);
-        ctx.save();
-        roundRect(ctx, coverX, coverY, coverSize, coverSize, 4);
-        ctx.clip();
-        ctx.drawImage(coverImg, coverX, coverY, coverSize, coverSize);
-        ctx.restore();
-      } catch { /* fallback bg */ }
+      try { coverImg = await fetchImage(score.coverUrl); } catch { /* skip */ }
     }
 
-    const txStart = statsStartX + textOffsetX;
+    if (coverImg) {
+      ctx.save();
+      ctx.globalAlpha = 0.35;
+      ctx.filter = "blur(8px) saturate(1.8)";
+      ctx.drawImage(
+        coverImg,
+        coverX - glowPad, coverY - glowPad,
+        coverSize + glowPad * 2, coverSize + glowPad * 2
+      );
+      ctx.restore();
+    }
+
+    drawRoundedRect(ctx, coverX, coverY, coverSize, coverSize, 5, BG_OVERLAY);
+    if (coverImg) {
+      ctx.save();
+      roundRect(ctx, coverX, coverY, coverSize, coverSize, 5);
+      ctx.clip();
+      ctx.drawImage(coverImg, coverX, coverY, coverSize, coverSize);
+      ctx.restore();
+    }
+
+    const topLineY = coverY + 2;
+    const botLineY = coverY + 19;
 
     ctx.font = `500 14px ${SANS}`;
     ctx.fillStyle = TEXT_PRIMARY;
-    const maxSongW = scoreMaxW - textOffsetX - 300;
+    const maxSongW = scoreMaxW - (txStart - statsStartX) - 300;
     let songText = `${score.songName} `;
     while (ctx.measureText(songText).width > maxSongW && songText.length > 10) {
       songText = songText.slice(0, -4) + "...";
     }
-    ctx.fillText(songText, txStart, sy);
+    ctx.fillText(songText, txStart, topLineY);
 
     const songW = ctx.measureText(songText).width;
     ctx.font = `500 11px ${MONO}`;
     ctx.fillStyle = TEXT_SECONDARY;
-    ctx.fillText(`[${diff}]`, txStart + songW + 6, sy + 2);
+    ctx.fillText(`[${diff}]`, txStart + songW + 6, topLineY + 2);
 
     ctx.font = `400 11px ${SANS}`;
     ctx.fillStyle = TEXT_TERTIARY;
     ctx.fillText(
       `${score.songAuthor} · Mapped by ${score.mapAuthor}`,
-      txStart, sy + 18
+      txStart, botLineY
     );
 
     const rightText = `${acc}%  |  ${ap}ap${isFC ? "  FC" : ""}`;
@@ -367,19 +385,19 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     const rightX = cardX + cardW - 32 - rightW;
 
     ctx.fillStyle = TEXT_SECONDARY;
-    ctx.fillText(rightText, rightX, sy + 1);
+    ctx.fillText(rightText, rightX, topLineY + 1);
 
     if (isFC) {
       const fcX = cardX + cardW - 32 - ctx.measureText("FC").width;
       ctx.fillStyle = SUCCESS;
-      ctx.fillText("FC", fcX, sy + 1);
+      ctx.fillText("FC", fcX, topLineY + 1);
     }
 
     const wapText = `(${score.weightedAp.toFixed(2)} weighted)`;
     ctx.font = `400 11px ${MONO}`;
     const wapW = ctx.measureText(wapText).width;
     ctx.fillStyle = TEXT_TERTIARY;
-    ctx.fillText(wapText, cardX + cardW - 32 - wapW, sy + 18);
+    ctx.fillText(wapText, cardX + cardW - 32 - wapW, botLineY);
 
     ctx.save();
     ctx.setLineDash([2, 4]);
@@ -390,8 +408,8 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     const leaderEnd = rightX - 10;
     if (leaderEnd > leaderStart) {
       ctx.beginPath();
-      ctx.moveTo(leaderStart, sy + 10);
-      ctx.lineTo(leaderEnd, sy + 10);
+      ctx.moveTo(leaderStart, topLineY + 10);
+      ctx.lineTo(leaderEnd, topLineY + 10);
       ctx.stroke();
     }
     ctx.restore();
