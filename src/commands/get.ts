@@ -1,6 +1,7 @@
 import { AttachmentBuilder, SlashCommandBuilder } from "discord.js";
 import { getCategories } from "../api/categories.js";
 import { ApiError } from "../api/client.js";
+import { getDiscordLink } from "../api/discord-links.js";
 import { getUserScores } from "../api/scores.js";
 import {
   getUser,
@@ -18,9 +19,9 @@ const get: Command = {
     .setDescription("Show a player's AccSaber profile card")
     .addStringOption((option) =>
       option
-        .setName("steam-id")
-        .setDescription("The player's Steam ID")
-        .setRequired(true)
+        .setName("user-id")
+        .setDescription("Player's user ID (defaults to your linked account)")
+        .setRequired(false)
     )
     .addStringOption((option) =>
       option
@@ -39,17 +40,37 @@ const get: Command = {
   async execute(interaction) {
     await interaction.deferReply();
 
-    const steamId = interaction.options.getString("steam-id", true);
+    let userId = interaction.options.getString("user-id");
     const categoryCode =
       interaction.options.getString("category") ?? "overall";
 
+    if (!userId) {
+      try {
+        const link = await getDiscordLink(interaction.user.id);
+        userId = link.userId;
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) {
+          await interaction.editReply({
+            embeds: [
+              errorEmbed(
+                "Not Registered",
+                "You haven't linked your account yet. Use `/register` or provide a `user-id`."
+              ),
+            ],
+          });
+          return;
+        }
+        throw err;
+      }
+    }
+
     const [userResult, levelResult, allStatsResult, diffResult, scoresResult] =
       await Promise.allSettled([
-        getUser(steamId),
-        getUserLevel(steamId),
-        getUserAllStatistics(steamId),
-        getUserStatsDiff(steamId, categoryCode),
-        getUserScores(steamId, { size: 3, sort: "weightedAp,desc" }),
+        getUser(userId),
+        getUserLevel(userId),
+        getUserAllStatistics(userId),
+        getUserStatsDiff(userId, categoryCode),
+        getUserScores(userId, { size: 3, sort: "weightedAp,desc" }),
       ]);
 
     if (userResult.status === "rejected") {
@@ -61,7 +82,7 @@ const get: Command = {
           embeds: [
             errorEmbed(
               "Player Not Found",
-              `No AccSaber profile found for \`${steamId}\`.`
+              `No AccSaber profile found for \`${userId}\`.`
             ),
           ],
         });
