@@ -5,7 +5,7 @@ export function parseHexColor(hex: string): number {
   return parseInt(hex.replace(/^#/, ""), 16);
 }
 
-function formatDifficulty(diff: string): string {
+export function formatDifficulty(diff: string): string {
   const map: Record<string, string> = {
     EASY: "Easy",
     NORMAL: "Normal",
@@ -16,7 +16,7 @@ function formatDifficulty(diff: string): string {
   return map[diff] ?? diff;
 }
 
-function countryFlag(countryCode: string): string {
+export function countryFlag(countryCode: string): string {
   if (!countryCode || countryCode.length !== 2) return "";
   return String.fromCodePoint(
     ...countryCode

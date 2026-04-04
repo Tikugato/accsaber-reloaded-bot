@@ -104,3 +104,22 @@ export interface LevelThreshold {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface UserResponse {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  country: string;
+  banned: boolean;
+  ssInactive: boolean;
+  hmd: string;
+  createdAt: string;
+}
+
+export interface UserAllStatisticsResponse {
+  totalXp: number;
+  totalScoreXp: number;
+  totalMilestoneXp: number;
+  totalMilestoneSetBonusXp: number;
+  categories: UserCategoryStatisticsResponse[];
+}
