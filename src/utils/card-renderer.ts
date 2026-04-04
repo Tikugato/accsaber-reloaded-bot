@@ -1,4 +1,5 @@
 import { createCanvas, GlobalFonts, loadImage } from "@napi-rs/canvas";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type {
@@ -38,14 +39,21 @@ const CATEGORY_LABEL: Record<string, string> = {
   low_mid: "Low Mid",
 };
 
+const SANS = '"Inter", "Segoe UI", sans-serif';
+const MONO = '"Cascadia", "Cascadia Code", "Consolas", monospace';
+
 let fontsRegistered = false;
 
 export function registerFonts(): void {
   if (fontsRegistered) return;
-  GlobalFonts.registerFromPath(join(FONTS, "Inter.ttf"), "Inter");
-  GlobalFonts.registerFromPath(join(FONTS, "CascadiaCode-Regular.ttf"), "Cascadia");
-  GlobalFonts.registerFromPath(join(FONTS, "CascadiaCode-Bold.ttf"), "CascadiaBold");
   fontsRegistered = true;
+  const register = (file: string, family: string) => {
+    const path = join(FONTS, file);
+    if (existsSync(path)) GlobalFonts.registerFromPath(path, family);
+  };
+  register("Inter.ttf", "Inter");
+  register("CascadiaCode-Regular.ttf", "Cascadia");
+  register("CascadiaCode-Bold.ttf", "Cascadia");
 }
 
 export interface ProfileCardData {
@@ -127,8 +135,9 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
   ctx.fillStyle = BG_BASE;
   ctx.fillRect(0, 0, W, H);
 
+  let avatarImg: Awaited<ReturnType<typeof loadImage>> | null = null;
   try {
-    const avatarImg = await fetchImage(data.avatarUrl);
+    avatarImg = await fetchImage(data.avatarUrl);
     ctx.save();
     ctx.globalAlpha = 0.15;
     ctx.filter = "blur(40px)";
@@ -151,28 +160,31 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
   const avSize = 80;
   const avX = 56;
   const avY = 52;
+  const avPad = 3;
 
   ctx.save();
   ctx.shadowColor = tierHex;
   ctx.shadowBlur = 16;
-  drawRoundedRect(ctx, avX - 3, avY - 3, avSize + 6, avSize + 6, 12, tierHex);
+  roundRect(ctx, avX - avPad, avY - avPad, avSize + avPad * 2, avSize + avPad * 2, 12);
+  ctx.strokeStyle = tierHex;
+  ctx.lineWidth = avPad;
+  ctx.stroke();
   ctx.restore();
 
-  try {
-    const avatarImg = await fetchImage(data.avatarUrl);
+  drawRoundedRect(ctx, avX, avY, avSize, avSize, 10, BG_ELEVATED);
+
+  if (avatarImg) {
     ctx.save();
     roundRect(ctx, avX, avY, avSize, avSize, 10);
     ctx.clip();
     ctx.drawImage(avatarImg, avX, avY, avSize, avSize);
     ctx.restore();
-  } catch {
-    drawRoundedRect(ctx, avX, avY, avSize, avSize, 10, BG_ELEVATED);
   }
 
   const nameX = avX + avSize + 20;
   const nameY = avY + 12;
 
-  ctx.font = '700 28px "Inter"';
+  ctx.font = `700 28px ${SANS}`;
   ctx.fillStyle = TEXT_PRIMARY;
   ctx.textBaseline = "top";
   ctx.fillText(data.name, nameX, nameY);
@@ -182,7 +194,7 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
   if (country && country.length === 2) {
     const tagX = nameX + nameWidth + 12;
     const tagY = nameY + 4;
-    ctx.font = '700 11px "Cascadia"';
+    ctx.font = `700 11px ${MONO}`;
     const tagW = ctx.measureText(country).width + 12;
     drawRoundedRect(ctx, tagX, tagY, tagW, 20, 4, BG_OVERLAY);
     ctx.fillStyle = TEXT_SECONDARY;
@@ -193,14 +205,14 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
 
   if (data.level) {
     const lvY = nameY + 36;
-    ctx.font = '500 15px "Cascadia"';
+    ctx.font = `500 15px ${MONO}`;
     ctx.fillStyle = tierHex;
     const lvText = `Lv.${data.level.level}`;
     ctx.fillText(lvText, nameX, lvY);
 
     const lvW = ctx.measureText(lvText).width;
     ctx.fillStyle = TEXT_SECONDARY;
-    ctx.font = '400 15px "Inter"';
+    ctx.font = `400 15px ${SANS}`;
     ctx.fillText(` — ${data.level.title}`, nameX + lvW, lvY);
 
     const barX = nameX;
@@ -214,7 +226,7 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
       drawRoundedRect(ctx, barX, barY, Math.max(barW * progress, barH), barH, 2.5, tierHex);
     }
 
-    ctx.font = '400 11px "Cascadia"';
+    ctx.font = `400 11px ${MONO}`;
     ctx.fillStyle = TEXT_TERTIARY;
     ctx.fillText(
       `${numberFmt(data.level.xpForCurrentLevel, 0)} / ${numberFmt(data.level.xpForNextLevel, 0)} XP`,
@@ -223,7 +235,7 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
   }
 
   const catLabel = CATEGORY_LABEL[data.categoryCode] ?? "Overall";
-  ctx.font = '700 13px "Cascadia"';
+  ctx.font = `700 13px ${MONO}`;
   const catW = ctx.measureText(catLabel).width + 24;
   const catX = cardX + cardW - catW - 24;
   const catY = avY + 6;
@@ -264,19 +276,19 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     ctx.fillRect(bx, statsY, 3, boxH);
     ctx.restore();
 
-    ctx.font = '500 11px "Inter"';
+    ctx.font = `500 11px ${SANS}`;
     ctx.fillStyle = TEXT_TERTIARY;
     ctx.textBaseline = "top";
     ctx.letterSpacing = "0.5px";
     ctx.fillText(box.label, bx + 16, statsY + 14);
     ctx.letterSpacing = "0px";
 
-    ctx.font = '700 22px "Cascadia"';
+    ctx.font = `700 22px ${MONO}`;
     ctx.fillStyle = TEXT_PRIMARY;
     ctx.fillText(box.value, bx + 16, statsY + 34);
 
     if (box.trend.text) {
-      ctx.font = '500 12px "Cascadia"';
+      ctx.font = `500 12px ${MONO}`;
       ctx.fillStyle = box.trend.color;
       ctx.fillText(box.trend.text, bx + 16, statsY + 64);
     }
@@ -284,7 +296,7 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
 
   const scoresY = statsY + boxH + 32;
 
-  ctx.font = '600 13px "Inter"';
+  ctx.font = `600 13px ${SANS}`;
   ctx.fillStyle = TEXT_TERTIARY;
   ctx.textBaseline = "top";
   ctx.letterSpacing = "1px";
@@ -304,11 +316,11 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     const isFC = score.misses === 0 && score.badCuts === 0;
 
     const scoreCatColor = CATEGORY_HEX[data.categoryIdToCode[score.categoryId]] ?? accent;
-    ctx.font = '700 14px "Cascadia"';
+    ctx.font = `700 14px ${MONO}`;
     ctx.fillStyle = scoreCatColor;
     ctx.fillText(`${i + 1}.`, statsStartX, sy);
 
-    ctx.font = '500 14px "Inter"';
+    ctx.font = `500 14px ${SANS}`;
     ctx.fillStyle = TEXT_PRIMARY;
     const maxSongW = scoreMaxW - 340;
     let songText = `${score.songName} `;
@@ -318,12 +330,12 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     ctx.fillText(songText, statsStartX + 28, sy);
 
     const songW = ctx.measureText(songText).width;
-    ctx.font = '500 11px "Cascadia"';
+    ctx.font = `500 11px ${MONO}`;
     ctx.fillStyle = TEXT_SECONDARY;
     ctx.fillText(`[${diff}]`, statsStartX + 28 + songW + 6, sy + 2);
 
     const rightText = `${acc}%  |  ${ap}ap${isFC ? "  FC" : ""}`;
-    ctx.font = '500 13px "Cascadia"';
+    ctx.font = `500 13px ${MONO}`;
     const rightW = ctx.measureText(rightText).width;
     const rightX = cardX + cardW - 32 - rightW;
 
@@ -353,7 +365,7 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
   }
 
   if (data.topScores.length === 0 && data.stats) {
-    ctx.font = '400 14px "Inter"';
+    ctx.font = `400 14px ${SANS}`;
     ctx.fillStyle = TEXT_TERTIARY;
     ctx.fillText("No scores yet", statsStartX, scoreStartY);
   }
@@ -368,7 +380,7 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
   ctx.lineTo(cardX + cardW - 32, footDivY);
   ctx.stroke();
 
-  ctx.font = '400 12px "Inter"';
+  ctx.font = `400 12px ${SANS}`;
   ctx.fillStyle = TEXT_TERTIARY;
   ctx.textBaseline = "middle";
   ctx.fillText("accsaberreloaded.com", statsStartX, footContentY + 12);
