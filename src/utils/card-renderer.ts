@@ -11,7 +11,9 @@ import type {
 import { getTierForLevel } from "./roles.js";
 import { formatDifficulty } from "./score-feed-embeds.js";
 
-const ASSETS = join(process.cwd(), "src", "assets");
+const ASSETS = existsSync(join(process.cwd(), "src", "assets"))
+  ? join(process.cwd(), "src", "assets")
+  : join(process.cwd(), "assets");
 const FONTS = join(ASSETS, "fonts");
 
 const BG_BASE = "#0a0a0f";
