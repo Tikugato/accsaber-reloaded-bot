@@ -1,6 +1,4 @@
 import { EmbedBuilder, Events, type MessageReaction, type PartialMessageReaction, type PartialUser, type User } from "discord.js";
-import { writeFileSync } from "node:fs";
-import { resolve } from "node:path";
 import type { ArBot } from "../client.js";
 import { config } from "../config.js";
 import { Colors } from "../utils/embeds.js";
@@ -47,28 +45,18 @@ export async function publishRoleMessage(client: ArBot): Promise<void> {
       lines.join("\n")
     );
 
-  if (rc.messageId) {
-    try {
-      const existing = await channel.messages.fetch(rc.messageId);
-      await existing.edit({ embeds: [embed] });
-      return;
-    } catch {
-      /* message gone, send a new one */
-    }
+  const messages = await channel.messages.fetch({ limit: 1 });
+  const existing = messages.first();
+
+  if (existing) {
+    await existing.edit({ embeds: [embed] });
+    return;
   }
 
   const sent = await channel.send({ embeds: [embed] });
 
   for (const entry of Object.values(rc.roles)) {
     await sent.react(entry.emoji);
-  }
-
-  rc.messageId = sent.id;
-  const configPath = resolve(process.cwd(), "config.json");
-  try {
-    writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n", "utf-8");
-  } catch {
-    console.warn("Could not persist reactionRoles.messageId to config.json");
   }
 }
 
@@ -79,7 +67,7 @@ export const messageReactionAdd = {
     if (!resolved || user.bot) return;
 
     const rc = config.reactionRoles;
-    if (!rc || resolved.message.id !== rc.messageId) return;
+    if (!rc || resolved.message.channelId !== rc.channelId) return;
 
     const emoji = resolved.emoji.name;
     if (!emoji) return;
@@ -106,7 +94,7 @@ export const messageReactionRemove = {
     if (!resolved || user.bot) return;
 
     const rc = config.reactionRoles;
-    if (!rc || resolved.message.id !== rc.messageId) return;
+    if (!rc || resolved.message.channelId !== rc.channelId) return;
 
     const emoji = resolved.emoji.name;
     if (!emoji) return;

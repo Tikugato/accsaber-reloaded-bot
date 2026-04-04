@@ -91,7 +91,6 @@ export interface ReactionRoleEntry {
 
 export interface ReactionRolesConfig {
   channelId: string;
-  messageId?: string;
   roles: Record<string, ReactionRoleEntry>;
 }
 
