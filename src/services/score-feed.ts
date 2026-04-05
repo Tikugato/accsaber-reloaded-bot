@@ -1,11 +1,15 @@
-import { type Client, type EmbedBuilder, type TextChannel } from "discord.js";
+import { type Client, type TextChannel } from "discord.js";
 import { getCategoryCodeById, getCategoryNameById } from "../api/categories.js";
 import { getMapLeaderboard, getUserScores } from "../api/scores.js";
 import { getUserCategoryStatistics, getUserStatsDiff } from "../api/statistics.js";
 import { config } from "../config.js";
 import type { ScoreResponse } from "../types/api.js";
 import type { ScoreFeedConfig, TopRankCategoryConfig } from "../types/config.js";
-import { buildFeedEmbed, parseHexColor } from "../utils/score-feed-embeds.js";
+import {
+  buildFeedEmbed,
+  parseHexColor,
+  type FeedEmbedResult,
+} from "../utils/score-feed-embeds.js";
 import { renderTemplate } from "../utils/templates.js";
 
 function commonVars(
@@ -56,63 +60,69 @@ export class ScoreFeed {
   }
 
   async handleScore(score: ScoreResponse): Promise<void> {
-    const embeds: EmbedBuilder[] = [];
+    const messages: FeedEmbedResult[] = [];
 
-    let rankOneEmbed: EmbedBuilder | null = null;
+    let rankOneFired = false;
     if (this.cfg.rankOne.enabled) {
-      rankOneEmbed = await this.checkRankOne(score).catch((err) => {
+      const result = await this.checkRankOne(score).catch((err) => {
         console.error("[ScoreFeed] Trigger check failed:", err);
         return null;
       });
-      if (rankOneEmbed) embeds.push(rankOneEmbed);
+      if (result) {
+        messages.push(result);
+        rankOneFired = true;
+      }
     }
 
-    let allScoresEmbed: EmbedBuilder | null = null;
+    let allScoresFired = false;
     if (this.cfg.allScoresAbove.enabled) {
-      allScoresEmbed = await this.checkAllScoresAbove(score).catch((err) => {
+      const result = await this.checkAllScoresAbove(score).catch((err) => {
         console.error("[ScoreFeed] Trigger check failed:", err);
         return null;
       });
-      if (allScoresEmbed) embeds.push(allScoresEmbed);
+      if (result) {
+        messages.push(result);
+        allScoresFired = true;
+      }
     }
 
-    const parallel: Promise<EmbedBuilder | null>[] = [];
-    const multi: Promise<EmbedBuilder[]>[] = [];
+    const single: Promise<FeedEmbedResult | null>[] = [];
+    const multi: Promise<FeedEmbedResult[]>[] = [];
 
-    if (!allScoresEmbed && this.cfg.firstMilestone.enabled) {
-      parallel.push(this.checkFirstMilestone(score));
+    if (!allScoresFired && this.cfg.firstMilestone.enabled) {
+      single.push(this.checkFirstMilestone(score));
     }
     if (this.cfg.underdog.enabled) {
-      parallel.push(this.checkUnderdog(score));
+      single.push(this.checkUnderdog(score));
     }
-    if (!rankOneEmbed && this.cfg.streak.enabled) {
-      parallel.push(this.checkStreak(score));
+    if (!rankOneFired && this.cfg.streak.enabled) {
+      single.push(this.checkStreak(score));
     }
     if (this.cfg.topRank.enabled) {
       multi.push(this.checkTopRank(score));
     }
 
-    const [parallelResults, multiResults] = await Promise.all([
-      Promise.allSettled(parallel),
+    const [singleResults, multiResults] = await Promise.all([
+      Promise.allSettled(single),
       Promise.allSettled(multi),
     ]);
 
-    for (const result of parallelResults) {
+    for (const result of singleResults) {
       if (result.status === "fulfilled" && result.value) {
-        embeds.push(result.value);
+        messages.push(result.value);
       } else if (result.status === "rejected") {
         console.error("[ScoreFeed] Trigger check failed:", result.reason);
       }
     }
     for (const result of multiResults) {
       if (result.status === "fulfilled") {
-        embeds.push(...result.value);
+        messages.push(...result.value);
       } else {
         console.error("[ScoreFeed] Trigger check failed:", result.reason);
       }
     }
 
-    if (embeds.length === 0) return;
+    if (messages.length === 0) return;
 
     try {
       const channel = await this.getChannel();
@@ -120,8 +130,8 @@ export class ScoreFeed {
         console.error("[ScoreFeed] Could not resolve channel", this.cfg.channelId);
         return;
       }
-      for (const embed of embeds) {
-        await channel.send({ embeds: [embed] });
+      for (const msg of messages) {
+        await channel.send({ embeds: [msg.embed], components: [msg.row] });
       }
     } catch (err) {
       console.error("[ScoreFeed] Failed to send embed:", err);
@@ -130,7 +140,7 @@ export class ScoreFeed {
 
   private async checkFirstMilestone(
     score: ScoreResponse
-  ): Promise<EmbedBuilder | null> {
+  ): Promise<FeedEmbedResult | null> {
     const { firstMilestone } = this.cfg;
     const enabledThresholds = firstMilestone.thresholds
       .filter((t) => t.enabled && score.ap >= t.ap)
@@ -190,7 +200,7 @@ export class ScoreFeed {
 
   private async checkAllScoresAbove(
     score: ScoreResponse
-  ): Promise<EmbedBuilder | null> {
+  ): Promise<FeedEmbedResult | null> {
     const { allScoresAbove } = this.cfg;
     if (score.ap < allScoresAbove.apThreshold) return null;
 
@@ -208,7 +218,7 @@ export class ScoreFeed {
 
   private async checkUnderdog(
     score: ScoreResponse
-  ): Promise<EmbedBuilder | null> {
+  ): Promise<FeedEmbedResult | null> {
     const { underdog } = this.cfg;
     if (score.rank > underdog.mapRankThreshold) return null;
 
@@ -237,7 +247,7 @@ export class ScoreFeed {
 
   private async checkRankOne(
     score: ScoreResponse
-  ): Promise<EmbedBuilder | null> {
+  ): Promise<FeedEmbedResult | null> {
     if (score.rank !== 1) return null;
 
     const category = await resolveCategory(score.categoryId);
@@ -266,7 +276,7 @@ export class ScoreFeed {
     });
   }
 
-  private async checkTopRank(score: ScoreResponse): Promise<EmbedBuilder[]> {
+  private async checkTopRank(score: ScoreResponse): Promise<FeedEmbedResult[]> {
     const { topRank } = this.cfg;
     const scoreCategory = await resolveCategory(score.categoryId);
 
@@ -278,13 +288,13 @@ export class ScoreFeed {
       categoriesToCheck.map((cat) => this.checkTopRankForCategory(score, cat))
     );
 
-    return results.filter((e): e is EmbedBuilder => e !== null);
+    return results.filter((e): e is FeedEmbedResult => e !== null);
   }
 
   private async checkTopRankForCategory(
     score: ScoreResponse,
     catConfig: TopRankCategoryConfig
-  ): Promise<EmbedBuilder | null> {
+  ): Promise<FeedEmbedResult | null> {
     const { topRank } = this.cfg;
 
     const [stats, diff] = await Promise.all([
@@ -352,7 +362,7 @@ export class ScoreFeed {
 
   private async checkStreak(
     score: ScoreResponse
-  ): Promise<EmbedBuilder | null> {
+  ): Promise<FeedEmbedResult | null> {
     const { streak } = this.cfg;
 
     const category = await resolveCategory(score.categoryId);

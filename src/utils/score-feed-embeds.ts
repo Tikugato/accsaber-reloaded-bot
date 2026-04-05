@@ -1,4 +1,9 @@
-import { EmbedBuilder } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  EmbedBuilder,
+} from "discord.js";
 import type { ScoreResponse } from "../types/api.js";
 
 export function parseHexColor(hex: string): number {
@@ -34,39 +39,16 @@ function profileUrl(score: ScoreResponse): string {
   return `https://accsaberreloaded.com/players/${score.userId}`;
 }
 
-function buildLinks(score: ScoreResponse): string {
-  const parts = [
-    `[Profile](${profileUrl(score)})`,
-    `[Map](${mapUrl(score)})`,
-  ];
-  if (score.blScoreId) {
-    parts.push(
-      `[Replay](https://replay.beatleader.com/?scoreId=${score.blScoreId})`
-    );
-  }
-  return parts.join(" · ");
-}
-
-function statsBlock(score: ScoreResponse, categoryName: string): string {
-  const lines = [
-    `**Map** ${score.songAuthor} - ${score.songName} [${formatDifficulty(score.difficulty)}]`,
-    `**Category** ${categoryName}`,
-    `**AP** \`${score.ap.toFixed(2)}\` · **Acc** \`${(score.accuracy * 100).toFixed(2)}%\` · **Rank** \`#${score.rank}\``,
-  ];
-
-  const comboParts: string[] = [];
+function comboLine(score: ScoreResponse): string {
+  const parts: string[] = [];
   if (score.misses === 0 && score.badCuts === 0) {
-    comboParts.push("**FC**");
+    parts.push("**FC**");
   } else {
-    if (score.misses > 0) comboParts.push(`${score.misses}x misses`);
-    if (score.badCuts > 0) comboParts.push(`${score.badCuts}x bad cuts`);
+    if (score.misses > 0) parts.push(`${score.misses}x misses`);
+    if (score.badCuts > 0) parts.push(`${score.badCuts}x bad cuts`);
   }
-  if (score.streak115 > 0) {
-    comboParts.push(`\`${score.streak115}x 115\``);
-  }
-  if (comboParts.length > 0) lines.push(comboParts.join(" · "));
-
-  return lines.join("\n");
+  if (score.streak115 > 0) parts.push(`${score.streak115}x 115`);
+  return parts.join(" · ");
 }
 
 export interface FeedEmbedOptions {
@@ -78,18 +60,18 @@ export interface FeedEmbedOptions {
   extraInfo?: string;
 }
 
-export function buildFeedEmbed(opts: FeedEmbedOptions): EmbedBuilder {
+export interface FeedEmbedResult {
+  embed: EmbedBuilder;
+  row: ActionRowBuilder<ButtonBuilder>;
+}
+
+export function buildFeedEmbed(opts: FeedEmbedOptions): FeedEmbedResult {
   const { score, color, title, categoryName, linkTarget, extraInfo } = opts;
 
   const url = linkTarget === "map" ? mapUrl(score) : profileUrl(score);
+  const description = `${score.songAuthor} – **${score.songName}** [${formatDifficulty(score.difficulty)}]`;
 
-  const lines = [
-    statsBlock(score, categoryName),
-  ];
-  if (extraInfo) lines.push(extraInfo);
-  lines.push(buildLinks(score));
-
-  return new EmbedBuilder()
+  const embed = new EmbedBuilder()
     .setColor(color)
     .setThumbnail(score.coverUrl)
     .setAuthor({
@@ -99,6 +81,36 @@ export function buildFeedEmbed(opts: FeedEmbedOptions): EmbedBuilder {
     })
     .setTitle(title)
     .setURL(url)
-    .setDescription(lines.join("\n"))
+    .setDescription(extraInfo ? `${description}\n${extraInfo}` : description)
+    .addFields(
+      { name: "AP", value: `\`${score.ap.toFixed(2)}\``, inline: true },
+      { name: "Accuracy", value: `\`${(score.accuracy * 100).toFixed(2)}%\``, inline: true },
+      { name: "Rank", value: `\`#${score.rank}\``, inline: true },
+      { name: "Category", value: categoryName, inline: true },
+      { name: "Combo", value: comboLine(score) || "–", inline: true },
+      { name: "Mapper", value: score.mapAuthor, inline: true },
+    )
     .setTimestamp(new Date(score.timeSet));
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setLabel("Profile")
+      .setStyle(ButtonStyle.Link)
+      .setURL(profileUrl(score)),
+    new ButtonBuilder()
+      .setLabel("Map")
+      .setStyle(ButtonStyle.Link)
+      .setURL(mapUrl(score)),
+  );
+
+  if (score.blScoreId) {
+    row.addComponents(
+      new ButtonBuilder()
+        .setLabel("Replay")
+        .setStyle(ButtonStyle.Link)
+        .setURL(`https://replay.beatleader.com/?scoreId=${score.blScoreId}`)
+    );
+  }
+
+  return { embed, row };
 }
