@@ -70,7 +70,7 @@
       "embedColor": "#22c55e",
       "mapRankThreshold": 5,
       "minCategoryRank": 50,
-      "messageTemplate": "(#{categoryRank}) just got #{rank} on a map!"
+      "messageTemplate": "(#{categoryRank} on {categoryName}) just got #{rank} on this map!"
     },
     "rankOne": {
       "enabled": true,

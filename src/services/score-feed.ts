@@ -162,12 +162,10 @@ export class ScoreFeed {
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
           new ButtonBuilder()
-            .setEmoji("👤")
             .setLabel("Profile")
             .setStyle(ButtonStyle.Link)
             .setURL(result.profileUrl),
           new ButtonBuilder()
-            .setEmoji("🗺️")
             .setLabel("Map")
             .setStyle(ButtonStyle.Link)
             .setURL(result.mapUrl),
@@ -175,7 +173,6 @@ export class ScoreFeed {
         if (result.replayUrl) {
           row.addComponents(
             new ButtonBuilder()
-              .setEmoji("▶️")
               .setLabel("Replay")
               .setStyle(ButtonStyle.Link)
               .setURL(result.replayUrl),
