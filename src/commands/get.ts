@@ -32,8 +32,7 @@ const get: Command = {
           { name: "Overall", value: "overall" },
           { name: "True Acc", value: "true_acc" },
           { name: "Standard Acc", value: "standard_acc" },
-          { name: "Tech Acc", value: "tech_acc" },
-          { name: "Low Mid", value: "low_mid" }
+          { name: "Tech Acc", value: "tech_acc" }
         )
     ),
 
