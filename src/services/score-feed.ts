@@ -111,7 +111,7 @@ export class ScoreFeed {
     if (this.cfg.underdog.enabled) {
       single.push(this.checkUnderdog(score));
     }
-    if (!milestoneFired && !rankOneFired && this.cfg.streak.enabled) {
+    if (!milestoneFired && !allScoresFired && !rankOneFired && this.cfg.streak.enabled) {
       single.push(this.checkStreak(score));
     }
     if (this.cfg.topRank.enabled) {
