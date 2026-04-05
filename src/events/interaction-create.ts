@@ -1,4 +1,4 @@
-import { Events, MessageFlags } from "discord.js";
+import { DiscordAPIError, Events, MessageFlags } from "discord.js";
 import type { ArBot } from "../client.js";
 import type { Interaction } from "discord.js";
 import { config } from "../config.js";
@@ -30,14 +30,23 @@ export default {
       await command.execute(interaction);
     } catch (err) {
       console.error(`Error executing /${interaction.commandName}:`, err);
+
       const embed = errorEmbed(
         "Something went wrong",
         "An unexpected error occurred. Try again later."
       );
-      if (interaction.deferred || interaction.replied) {
-        await interaction.editReply({ embeds: [embed] });
-      } else {
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+
+      try {
+        if (interaction.deferred || interaction.replied) {
+          await interaction.editReply({ embeds: [embed] });
+        } else {
+          await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+        }
+      } catch (replyErr) {
+        if (replyErr instanceof DiscordAPIError && (replyErr.code === 10062 || replyErr.code === 40060)) {
+          return;
+        }
+        console.error("Failed to send error reply:", replyErr);
       }
     }
   },

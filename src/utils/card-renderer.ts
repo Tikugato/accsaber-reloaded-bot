@@ -92,6 +92,24 @@ function drawRoundedRect(
   }
 }
 
+function relativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const secs = Math.floor(diff / 1000);
+  if (secs < 60) return "just now";
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  if (days < 30) return `${weeks}w ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  const years = Math.floor(days / 365);
+  return `${years}y ago`;
+}
+
 function numberFmt(n: number, decimals: number): string {
   return n.toLocaleString("en-US", {
     minimumFractionDigits: decimals,
@@ -385,6 +403,8 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
       txStart, botLineY
     );
 
+    const timeAgo = relativeTime(score.timeSet);
+
     const rankText = `#${score.rank}`;
     const rankColor = score.rank === 1 ? "#ffd700"
       : score.rank === 2 ? "#c0c0c0"
@@ -411,7 +431,7 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     const rankW = ctx.measureText(rankText).width;
     ctx.fillText(rankText, cardX + cardW - 32 - rankW, topLineY + 1);
 
-    const wapText = `(${score.weightedAp.toFixed(2)} weighted)`;
+    const wapText = `${timeAgo} · (${score.weightedAp.toFixed(2)} weighted)`;
     ctx.font = `400 11px ${MONO}`;
     const wapW = ctx.measureText(wapText).width;
     ctx.fillStyle = TEXT_TERTIARY;
