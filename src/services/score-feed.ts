@@ -56,37 +56,48 @@ export class ScoreFeed {
   }
 
   async handleScore(score: ScoreResponse): Promise<void> {
-    const checks: Promise<EmbedBuilder | null>[] = [];
+    const embeds: EmbedBuilder[] = [];
+
+    let rankOneEmbed: EmbedBuilder | null = null;
+    if (this.cfg.rankOne.enabled) {
+      rankOneEmbed = await this.checkRankOne(score).catch((err) => {
+        console.error("[ScoreFeed] Trigger check failed:", err);
+        return null;
+      });
+      if (rankOneEmbed) embeds.push(rankOneEmbed);
+    }
+
+    let allScoresEmbed: EmbedBuilder | null = null;
+    if (this.cfg.allScoresAbove.enabled) {
+      allScoresEmbed = await this.checkAllScoresAbove(score).catch((err) => {
+        console.error("[ScoreFeed] Trigger check failed:", err);
+        return null;
+      });
+      if (allScoresEmbed) embeds.push(allScoresEmbed);
+    }
+
+    const parallel: Promise<EmbedBuilder | null>[] = [];
     const multi: Promise<EmbedBuilder[]>[] = [];
 
-    if (this.cfg.firstMilestone.enabled) {
-      checks.push(this.checkFirstMilestone(score));
-    }
-    if (this.cfg.allScoresAbove.enabled) {
-      checks.push(this.checkAllScoresAbove(score));
+    if (!allScoresEmbed && this.cfg.firstMilestone.enabled) {
+      parallel.push(this.checkFirstMilestone(score));
     }
     if (this.cfg.underdog.enabled) {
-      checks.push(this.checkUnderdog(score));
+      parallel.push(this.checkUnderdog(score));
+    }
+    if (!rankOneEmbed && this.cfg.streak.enabled) {
+      parallel.push(this.checkStreak(score));
     }
     if (this.cfg.topRank.enabled) {
       multi.push(this.checkTopRank(score));
     }
 
-    let rankOneEmbed: EmbedBuilder | null = null;
-    if (this.cfg.rankOne.enabled) {
-      rankOneEmbed = await this.checkRankOne(score);
-    }
-
-    const [checkResults, multiResults] = await Promise.all([
-      Promise.allSettled(checks),
+    const [parallelResults, multiResults] = await Promise.all([
+      Promise.allSettled(parallel),
       Promise.allSettled(multi),
     ]);
 
-    const embeds: EmbedBuilder[] = [];
-
-    if (rankOneEmbed) embeds.push(rankOneEmbed);
-
-    for (const result of checkResults) {
+    for (const result of parallelResults) {
       if (result.status === "fulfilled" && result.value) {
         embeds.push(result.value);
       } else if (result.status === "rejected") {
@@ -98,15 +109,6 @@ export class ScoreFeed {
         embeds.push(...result.value);
       } else {
         console.error("[ScoreFeed] Trigger check failed:", result.reason);
-      }
-    }
-
-    if (!rankOneEmbed && this.cfg.streak.enabled) {
-      try {
-        const streakEmbed = await this.checkStreak(score);
-        if (streakEmbed) embeds.push(streakEmbed);
-      } catch (err) {
-        console.error("[ScoreFeed] Trigger check failed:", err);
       }
     }
 
@@ -137,6 +139,7 @@ export class ScoreFeed {
     if (enabledThresholds.length === 0) return null;
 
     const page = await getUserScores(score.userId, {
+      categoryId: score.categoryId,
       size: 2,
       sort: "ap,desc",
     });
@@ -245,7 +248,6 @@ export class ScoreFeed {
       title: renderTemplate(this.cfg.rankOne.messageTemplate, vars),
       categoryName: category.name,
       linkTarget: "profile",
-      thumbnail: "avatar",
       extraInfo,
     });
   }
@@ -303,7 +305,6 @@ export class ScoreFeed {
         title: renderTemplate(topRank.detailMessageTemplate, vars),
         categoryName: catName,
         linkTarget: "profile",
-        thumbnail: "avatar",
         extraInfo: `Moved from \`#${previousRank}\` to \`#${currentRank}\` in **${catName}**`,
       });
     }
@@ -332,7 +333,6 @@ export class ScoreFeed {
       title: renderTemplate(best.messageTemplate, vars),
       categoryName: catName,
       linkTarget: "profile",
-      thumbnail: "avatar",
     });
   }
 

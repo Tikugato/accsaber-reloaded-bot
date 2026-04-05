@@ -35,22 +35,22 @@
         {
           "ap": 700,
           "enabled": true,
-          "messageTemplate": "{playerName} just set their first 700+ AP score with {ap} AP ({accuracy}%) on {songName}!"
+          "messageTemplate": "{playerName} just set their first 700+ AP score!"
         },
         {
           "ap": 800,
           "enabled": true,
-          "messageTemplate": "{playerName} just set their first 800+ AP score with {ap} AP ({accuracy}%) on {songName}!"
+          "messageTemplate": "{playerName} just set their first 800+ AP score!"
         },
         {
           "ap": 900,
           "enabled": true,
-          "messageTemplate": "{playerName} just set their first 900+ AP score with {ap} AP ({accuracy}%) on {songName}!"
+          "messageTemplate": "{playerName} just set their first 900+ AP score!"
         },
         {
           "ap": 1000,
           "enabled": true,
-          "messageTemplate": "{playerName} just set their first 1000+ AP score with {ap} AP ({accuracy}%) on {songName}!"
+          "messageTemplate": "{playerName} just set their first 1000+ AP score!"
         }
       ]
     },
@@ -58,19 +58,19 @@
       "enabled": true,
       "apThreshold": 1060,
       "embedColor": "#ef4444",
-      "messageTemplate": "{playerName} just set a {ap} AP ({accuracy}%) score on {songName}!"
+      "messageTemplate": "{playerName} just set a massive score!"
     },
     "underdog": {
       "enabled": true,
       "embedColor": "#22c55e",
       "mapRankThreshold": 5,
       "minCategoryRank": 50,
-      "messageTemplate": "{playerName} (rank #{categoryRank}) just got #{rank} on {songName} with {ap} AP ({accuracy}%)!"
+      "messageTemplate": "{playerName} (#{categoryRank}) just got #{rank} on a map!"
     },
     "rankOne": {
       "enabled": true,
       "embedColor": "#ffd700",
-      "messageTemplate": "{playerName} just got #1 on {songName} with {ap} AP ({accuracy}%)!"
+      "messageTemplate": "{playerName} just got #1!"
     },
     "topRank": {
       "enabled": true,
