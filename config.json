@@ -30,7 +30,7 @@
     "reconnectIntervalMs": 5000,
     "firstMilestone": {
       "enabled": true,
-      "embedColor": "#ffd700",
+      "embedColor": "#f97316",
       "thresholds": [
         {
           "ap": 700,
@@ -62,7 +62,7 @@
     "allScoresAbove": {
       "enabled": true,
       "apThreshold": 1060,
-      "embedColor": "#ef4444",
+      "embedColor": "#38bdf8",
       "messageTemplate": "Just set a massive score!"
     },
     "underdog": {
@@ -141,7 +141,7 @@
       "categoryThresholds": [
         {
           "categoryCode": "tech_acc",
-          "threshold": 9
+          "threshold": 8
         },
         {
           "categoryCode": "standard_acc",
