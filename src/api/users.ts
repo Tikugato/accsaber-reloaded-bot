@@ -1,6 +1,5 @@
 import type {
   LevelResponse,
-  StatsDiffResponse,
   UserAllStatisticsResponse,
   UserResponse,
 } from "../types/api.js";
@@ -18,13 +17,4 @@ export function getUserAllStatistics(
   userId: string
 ): Promise<UserAllStatisticsResponse> {
   return apiGet<UserAllStatisticsResponse>(`/users/${userId}/statistics/all`);
-}
-
-export function getUserStatsDiff(
-  userId: string,
-  category = "overall"
-): Promise<StatsDiffResponse | undefined> {
-  return apiGet<StatsDiffResponse | undefined>(
-    `/users/${userId}/stats-diff?category=${encodeURIComponent(category)}`
-  );
 }

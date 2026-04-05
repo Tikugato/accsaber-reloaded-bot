@@ -1,4 +1,4 @@
-import type { Page, ScoreResponse } from "../types/api.js";
+import type { MapDifficultyResponse, Page, ScoreResponse } from "../types/api.js";
 import { apiGet } from "./client.js";
 
 export function getUserScores(
@@ -13,6 +13,14 @@ export function getUserScores(
   return apiGet<Page<ScoreResponse>>(
     `/users/${userId}/scores${qs ? `?${qs}` : ""}`
   );
+}
+
+export async function getMapDifficultyComplexity(
+  mapId: string,
+  difficultyId: string
+): Promise<number | undefined> {
+  const diffs = await apiGet<MapDifficultyResponse[]>(`/maps/${mapId}/difficulties`);
+  return diffs.find((d) => d.id === difficultyId)?.complexity;
 }
 
 export function getMapLeaderboard(

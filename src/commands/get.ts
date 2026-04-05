@@ -3,12 +3,8 @@ import { getCategories } from "../api/categories.js";
 import { ApiError } from "../api/client.js";
 import { getDiscordLink } from "../api/discord-links.js";
 import { getUserScores } from "../api/scores.js";
-import {
-  getUser,
-  getUserAllStatistics,
-  getUserLevel,
-  getUserStatsDiff,
-} from "../api/users.js";
+import { getUserStatsDiff } from "../api/statistics.js";
+import { getUser, getUserAllStatistics, getUserLevel } from "../api/users.js";
 import type { Command } from "../client.js";
 import { renderProfileCard } from "../utils/card-renderer.js";
 import { errorEmbed } from "../utils/embeds.js";

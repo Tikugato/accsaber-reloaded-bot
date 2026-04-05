@@ -69,6 +69,22 @@ export interface UserCategoryStatisticsResponse {
   createdAt: string;
 }
 
+export interface MapDifficultyResponse {
+  id: string;
+  mapId: string;
+  songName: string;
+  songAuthor: string;
+  mapAuthor: string;
+  coverUrl: string;
+  categoryId: string;
+  difficulty: string;
+  characteristic: string;
+  complexity: number;
+  active: boolean;
+  maxScore: number;
+  rankedAt: string;
+}
+
 export interface StatsDiffResponse {
   categoryId: string;
   rankingDiff: number;

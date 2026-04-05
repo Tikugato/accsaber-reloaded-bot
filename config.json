@@ -35,22 +35,27 @@
         {
           "ap": 700,
           "enabled": true,
-          "messageTemplate": "{playerName} just set their first 700+ AP score {firstEverLabel}!"
+          "messageTemplate": "Just set their first 700+ AP score {firstEverLabel}!"
         },
         {
           "ap": 800,
           "enabled": true,
-          "messageTemplate": "{playerName} just set their first 800+ AP score {firstEverLabel}!"
+          "messageTemplate": "Just set their first 800+ AP score {firstEverLabel}!"
         },
         {
           "ap": 900,
           "enabled": true,
-          "messageTemplate": "{playerName} just set their first 900+ AP score {firstEverLabel}!"
+          "messageTemplate": "Just set their first 900+ AP score {firstEverLabel}!"
         },
         {
           "ap": 1000,
           "enabled": true,
-          "messageTemplate": "{playerName} just set their first 1000+ AP score {firstEverLabel}!"
+          "messageTemplate": "Just set their first 1000+ AP score {firstEverLabel}!"
+        },
+        {
+          "ap": 1100,
+          "enabled": true,
+          "messageTemplate": "Just set their first 1100+ AP score {firstEverLabel}!"
         }
       ]
     },
@@ -58,19 +63,19 @@
       "enabled": true,
       "apThreshold": 1060,
       "embedColor": "#ef4444",
-      "messageTemplate": "{playerName} just set a massive score!"
+      "messageTemplate": "Just set a massive score!"
     },
     "underdog": {
       "enabled": true,
       "embedColor": "#22c55e",
       "mapRankThreshold": 5,
       "minCategoryRank": 50,
-      "messageTemplate": "{playerName} (#{categoryRank}) just got #{rank} on a map!"
+      "messageTemplate": "(#{categoryRank}) just got #{rank} on a map!"
     },
     "rankOne": {
       "enabled": true,
       "embedColor": "#ffd700",
-      "messageTemplate": "{playerName} just got a #1!"
+      "messageTemplate": "Just got a #1!"
     },
     "topRank": {
       "enabled": true,
@@ -93,37 +98,37 @@
         }
       ],
       "detailThreshold": 10,
-      "detailMessageTemplate": "{playerName} is now #{categoryRank} in {categoryName}!",
+      "detailMessageTemplate": "Is now #{categoryRank} in {categoryName}!",
       "thresholds": [
         {
           "rank": 10,
           "enabled": true,
-          "messageTemplate": "{playerName} entered the top 10 in {categoryName}!"
+          "messageTemplate": "Entered the top 10 in {categoryName}!"
         },
         {
           "rank": 25,
           "enabled": true,
-          "messageTemplate": "{playerName} entered the top 25 in {categoryName}!"
+          "messageTemplate": "Entered the top 25 in {categoryName}!"
         },
         {
           "rank": 50,
           "enabled": true,
-          "messageTemplate": "{playerName} entered the top 50 in {categoryName}!"
+          "messageTemplate": "Entered the top 50 in {categoryName}!"
         },
         {
           "rank": 100,
           "enabled": true,
-          "messageTemplate": "{playerName} entered the top 100 in {categoryName}!"
+          "messageTemplate": "Entered the top 100 in {categoryName}!"
         },
         {
           "rank": 200,
           "enabled": true,
-          "messageTemplate": "{playerName} entered the top 200 in {categoryName}!"
+          "messageTemplate": "Entered the top 200 in {categoryName}!"
         },
         {
           "rank": 300,
           "enabled": true,
-          "messageTemplate": "{playerName} entered the top 300 in {categoryName}!"
+          "messageTemplate": "Entered the top 300 in {categoryName}!"
         }
       ]
     },
@@ -144,7 +149,7 @@
           "threshold": 12
         }
       ],
-      "messageTemplate": "{playerName} hit a {streak115} note 115 streak on {songName} ({categoryName})!"
+      "messageTemplate": "Hit a {streak115} note 115 streak on {songName}!"
     }
   },
   "reactionRoles": {
