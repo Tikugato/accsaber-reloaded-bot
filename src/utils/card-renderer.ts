@@ -411,9 +411,8 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     const topLineY = coverY + 2;
     const botLineY = coverY + 19;
 
-    const scoreAge = ageColor(score.timeSet);
     ctx.font = `500 14px ${SANS}`;
-    ctx.fillStyle = scoreAge;
+    ctx.fillStyle = TEXT_PRIMARY;
     const maxSongW = scoreMaxW - (txStart - statsStartX) - 300;
     let songText = `${score.songName} `;
     while (ctx.measureText(songText).width > maxSongW && songText.length > 10) {
@@ -461,11 +460,15 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     const rankW = ctx.measureText(rankText).width;
     ctx.fillText(rankText, cardX + cardW - 32 - rankW, topLineY + 1);
 
-    const wapText = `${timeAgo} · (${score.weightedAp.toFixed(2)} weighted)`;
+    const wapSuffix = ` · (${score.weightedAp.toFixed(2)} weighted)`;
     ctx.font = `400 11px ${MONO}`;
-    const wapW = ctx.measureText(wapText).width;
+    const fullW = ctx.measureText(timeAgo + wapSuffix).width;
+    const botRightX = cardX + cardW - 32 - fullW;
+    ctx.fillStyle = ageColor(score.timeSet);
+    ctx.fillText(timeAgo, botRightX, botLineY);
+    const timeW = ctx.measureText(timeAgo).width;
     ctx.fillStyle = TEXT_TERTIARY;
-    ctx.fillText(wapText, cardX + cardW - 32 - wapW, botLineY);
+    ctx.fillText(wapSuffix, botRightX + timeW, botLineY);
 
     ctx.save();
     ctx.setLineDash([2, 4]);
