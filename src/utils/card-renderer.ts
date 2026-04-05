@@ -164,24 +164,28 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
   const avY = 52;
   const avPad = 3;
 
+  const borderSize = avSize + avPad * 2;
+  const borderX = avX - avPad;
+  const borderY = avY - avPad;
+
   ctx.save();
   ctx.shadowColor = tierHex;
   ctx.shadowBlur = 16;
-  roundRect(ctx, avX - avPad, avY - avPad, avSize + avPad * 2, avSize + avPad * 2, 12);
-  ctx.strokeStyle = tierHex;
-  ctx.lineWidth = avPad;
-  ctx.stroke();
+  drawRoundedRect(ctx, borderX, borderY, borderSize, borderSize, 12, BG_ELEVATED);
   ctx.restore();
-
-  drawRoundedRect(ctx, avX, avY, avSize, avSize, 10, BG_ELEVATED);
 
   if (avatarImg) {
     ctx.save();
-    roundRect(ctx, avX, avY, avSize, avSize, 10);
+    roundRect(ctx, borderX, borderY, borderSize, borderSize, 12);
     ctx.clip();
     ctx.drawImage(avatarImg, avX, avY, avSize, avSize);
     ctx.restore();
   }
+
+  roundRect(ctx, borderX, borderY, borderSize, borderSize, 12);
+  ctx.strokeStyle = tierHex;
+  ctx.lineWidth = avPad;
+  ctx.stroke();
 
   const nameX = avX + avSize + 20;
   const nameY = avY + 12;
