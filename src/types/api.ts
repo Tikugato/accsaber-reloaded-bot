@@ -85,6 +85,13 @@ export interface MapDifficultyResponse {
   rankedAt: string;
 }
 
+export interface LeaderboardEntry {
+  ranking: number;
+  userId: string;
+  userName: string;
+  ap: number;
+}
+
 export interface StatsDiffResponse {
   categoryId: string;
   rankingDiff: number;

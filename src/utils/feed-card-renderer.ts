@@ -7,6 +7,7 @@ import {
   BG_BASE,
   BG_ELEVATED,
   BG_OVERLAY,
+  CATEGORY_HEX,
   MONO,
   SANS,
   SUCCESS,
@@ -26,6 +27,7 @@ export interface FeedCardData {
   score: ScoreResponse;
   title: string;
   accentColor: string;
+  categoryCode: string;
   categoryName: string;
   level?: number;
   complexity?: number;
@@ -63,10 +65,8 @@ export async function renderFeedCard(data: FeedCardData): Promise<FeedCardResult
     ? `#${tierInfo.color.toString(16).padStart(6, "0")}`
     : TEXT_SECONDARY;
 
-  let contentH = 260;
-  if (data.subtitle) contentH += 16;
+  let contentH = 238;
   if (data.preamble) contentH += 18;
-  if (data.extraInfo) contentH += 16;
   const H = CARD_Y * 2 + contentH;
   const CARD_H = contentH;
 
@@ -107,11 +107,12 @@ export async function renderFeedCard(data: FeedCardData): Promise<FeedCardResult
   let curY = CARD_Y + PAD - 2;
 
   const catLabel = data.categoryName;
+  const catColor = CATEGORY_HEX[data.categoryCode] ?? CATEGORY_HEX.overall;
   ctx.font = `700 11px ${MONO}`;
   const catW = ctx.measureText(catLabel).width + 20;
   const catBadgeX = rightEdge - catW;
-  drawRoundedRect(ctx, catBadgeX, curY, catW, 22, 11, "rgba(0,0,0,0.3)", accentColor);
-  ctx.fillStyle = accentColor;
+  drawRoundedRect(ctx, catBadgeX, curY, catW, 22, 11, "rgba(0,0,0,0.3)", catColor);
+  ctx.fillStyle = catColor;
   ctx.textBaseline = "middle";
   ctx.fillText(catLabel, catBadgeX + 10, curY + 11);
   ctx.textBaseline = "top";
@@ -239,8 +240,6 @@ export async function renderFeedCard(data: FeedCardData): Promise<FeedCardResult
 
   curY += coverSize + 10;
 
-  curY += 4;
-
   const apStr = numberFmt(score.ap, 2);
   const accStr = `${(score.accuracy * 100).toFixed(2)}%`;
   const rankStr = `#${score.rank}`;
@@ -285,8 +284,8 @@ export async function renderFeedCard(data: FeedCardData): Promise<FeedCardResult
     drawX += ctx.measureText(rightParts[i].text).width;
   }
 
-  const footDivY = CARD_Y + CARD_H - 44;
-  const footContentY = footDivY + 8;
+  const footDivY = CARD_Y + CARD_H - 34;
+  const footContentY = footDivY + 6;
 
   ctx.strokeStyle = BG_OVERLAY;
   ctx.lineWidth = 1;

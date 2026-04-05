@@ -98,7 +98,10 @@
         }
       ],
       "detailThreshold": 10,
+      "passedThreshold": 50,
       "detailMessageTemplate": "Is now #{categoryRank} in {categoryName}!",
+      "detailSubtitleTemplate": "Moved from #{previousRank}{passedInfo}",
+      "thresholdSubtitleTemplate": "Now #{categoryRank}{passedInfo}",
       "thresholds": [
         {
           "rank": 10,

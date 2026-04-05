@@ -48,7 +48,10 @@ export interface TopRankConfig {
   categories: TopRankCategoryConfig[];
   thresholds: TopRankThresholdConfig[];
   detailThreshold: number;
+  passedThreshold: number;
   detailMessageTemplate: string;
+  detailSubtitleTemplate: string;
+  thresholdSubtitleTemplate: string;
 }
 
 export interface StreakCategoryConfig {

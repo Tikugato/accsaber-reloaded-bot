@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { getCategoryCodeById, getCategoryNameById } from "../api/categories.js";
 import { getMapDifficultyComplexity, getMapLeaderboard, getUserScores } from "../api/scores.js";
-import { getUserCategoryStatistics, getUserStatsDiff } from "../api/statistics.js";
+import { getCategoryLeaderboardAt, getUserCategoryStatistics, getUserStatsDiff } from "../api/statistics.js";
 import { getUserLevel } from "../api/users.js";
 import { config } from "../config.js";
 import type { ScoreResponse } from "../types/api.js";
@@ -65,6 +65,8 @@ export class ScoreFeed {
   }
 
   async handleScore(score: ScoreResponse): Promise<void> {
+    if (score.rank === 0) return;
+
     const cards: FeedCardData[] = [];
 
     let milestoneFired = false;
@@ -223,6 +225,7 @@ export class ScoreFeed {
         score,
         title: renderTemplate(overallMatched.messageTemplate, vars),
         accentColor: overallMatched.embedColor ?? firstMilestone.embedColor,
+        categoryCode: category.code,
         categoryName: category.name,
         preamble: "They earned it with a score on:",
       };
@@ -244,6 +247,7 @@ export class ScoreFeed {
       score,
       title: renderTemplate(catMatched.messageTemplate, vars),
       accentColor: catMatched.embedColor ?? firstMilestone.embedColor,
+      categoryCode: category.code,
       categoryName: category.name,
       preamble: "They earned it with a score on:",
     };
@@ -262,6 +266,7 @@ export class ScoreFeed {
       score,
       title: renderTemplate(allScoresAbove.messageTemplate, vars),
       accentColor: allScoresAbove.embedColor,
+      categoryCode: category.code,
       categoryName: category.name,
     };
   }
@@ -286,6 +291,7 @@ export class ScoreFeed {
       score,
       title: renderTemplate(underdog.messageTemplate, vars),
       accentColor: underdog.embedColor,
+      categoryCode: category.code,
       categoryName: category.name,
       extraInfo: `Category rank: #${stats.ranking}`,
     };
@@ -316,6 +322,7 @@ export class ScoreFeed {
       score,
       title: renderTemplate(this.cfg.rankOne.messageTemplate, vars),
       accentColor: this.cfg.rankOne.embedColor,
+      categoryCode: category.code,
       categoryName: category.name,
       extraInfo,
     };
@@ -355,8 +362,27 @@ export class ScoreFeed {
       ? "Overall"
       : (await getCategoryNameById(stats.categoryId)) ?? catConfig.categoryCode;
     const accent = catConfig.embedColor ?? CATEGORY_HEX[catConfig.categoryCode] ?? CATEGORY_HEX.overall;
+    const isDetail = currentRank <= topRank.detailThreshold;
+    const showPassed = currentRank <= topRank.passedThreshold;
 
-    if (currentRank <= topRank.detailThreshold) {
+    let passedInfo = "";
+    if (showPassed) {
+      try {
+        const passed = await getCategoryLeaderboardAt(stats.categoryId, currentRank + 1);
+        if (passed && passed.userId !== score.userId) {
+          passedInfo = ` - Passed ${passed.userName}`;
+        }
+      } catch { /* skip */ }
+    }
+
+    const subtitleVars = {
+      categoryRank: currentRank,
+      previousRank,
+      categoryName: catName,
+      passedInfo,
+    };
+
+    if (isDetail) {
       const key = `${score.userId}:${catConfig.categoryCode}:detail:${currentRank}`;
       if (this.topRankAnnounced.has(key)) return null;
       this.topRankAnnounced.add(key);
@@ -372,8 +398,9 @@ export class ScoreFeed {
         score,
         title: renderTemplate(topRank.detailMessageTemplate, vars),
         accentColor: accent,
+        categoryCode: catConfig.categoryCode,
         categoryName: catName,
-        subtitle: `Moved from #${previousRank} to #${currentRank} in ${catName}`,
+        subtitle: renderTemplate(topRank.detailSubtitleTemplate, subtitleVars),
         preamble: "They earned it with a score on:",
       };
     }
@@ -400,7 +427,9 @@ export class ScoreFeed {
       score,
       title: renderTemplate(best.messageTemplate, vars),
       accentColor: accent,
+      categoryCode: catConfig.categoryCode,
       categoryName: catName,
+      subtitle: showPassed ? renderTemplate(topRank.thresholdSubtitleTemplate, subtitleVars) : undefined,
       preamble: "They earned it with a score on:",
     };
   }
@@ -424,6 +453,7 @@ export class ScoreFeed {
       score,
       title: renderTemplate(streak.messageTemplate, vars),
       accentColor: streak.embedColor,
+      categoryCode: category.code,
       categoryName: category.name,
     };
   }

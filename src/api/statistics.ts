@@ -1,4 +1,6 @@
 import type {
+  LeaderboardEntry,
+  Page,
   StatsDiffResponse,
   UserCategoryStatisticsResponse,
 } from "../types/api.js";
@@ -11,6 +13,17 @@ export function getUserCategoryStatistics(
   return apiGet<UserCategoryStatisticsResponse>(
     `/users/${userId}/statistics?category=${encodeURIComponent(categoryCode)}`
   );
+}
+
+export async function getCategoryLeaderboardAt(
+  categoryId: string,
+  rank: number
+): Promise<LeaderboardEntry | undefined> {
+  const page = Math.max(0, rank - 1);
+  const result = await apiGet<Page<LeaderboardEntry>>(
+    `/leaderboards/${categoryId}?page=${page}&size=1&sort=ranking,asc`
+  );
+  return result.content.find((e) => e.ranking === rank);
 }
 
 export function getUserStatsDiff(
