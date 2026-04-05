@@ -41,8 +41,8 @@ const CATEGORY_LABEL: Record<string, string> = {
   low_mid: "Low Mid",
 };
 
-const SANS = '"Inter", "Segoe UI", sans-serif';
-const MONO = '"Cascadia", "Cascadia Code", "Consolas", monospace';
+const SANS = '"Inter", "Noto Sans JP", "Segoe UI", sans-serif';
+const MONO = '"Cascadia", "Cascadia Code", "Noto Sans JP", "Consolas", monospace';
 
 let fontsRegistered = false;
 
@@ -56,6 +56,7 @@ export function registerFonts(): void {
   register("Inter.ttf", "Inter");
   register("CascadiaCode-Regular.ttf", "Cascadia");
   register("CascadiaCode-Bold.ttf", "Cascadia");
+  register("NotoSansJP.ttf", "Noto Sans JP");
 }
 
 export interface ProfileCardData {
@@ -409,8 +410,8 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
     const rankText = `#${score.rank}`;
     const rankColor = score.rank === 1 ? "#ffd700"
       : score.rank === 2 ? "#c0c0c0"
-      : score.rank === 3 ? "#cd7f32"
-      : TEXT_TERTIARY;
+        : score.rank === 3 ? "#cd7f32"
+          : TEXT_TERTIARY;
 
     const rightText = `${acc}%  |  ${ap}ap${isFC ? "  FC" : ""}  ${rankText}`;
     ctx.font = `500 13px ${MONO}`;
