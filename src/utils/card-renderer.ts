@@ -67,6 +67,7 @@ export interface ProfileCardData {
   stats?: UserCategoryStatisticsResponse;
   diff?: StatsDiffResponse;
   topScores: ScoreResponse[];
+  scoresLabel: string;
   categoryIdToCode: Record<string, string>;
 }
 
@@ -326,7 +327,7 @@ export async function renderProfileCard(data: ProfileCardData): Promise<Buffer> 
   ctx.fillStyle = TEXT_TERTIARY;
   ctx.textBaseline = "top";
   ctx.letterSpacing = "1px";
-  ctx.fillText("TOP SCORES", statsStartX, scoresY);
+  ctx.fillText(data.scoresLabel, statsStartX, scoresY);
   ctx.letterSpacing = "0px";
 
   const coverSize = 34;

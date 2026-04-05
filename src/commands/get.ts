@@ -34,6 +34,16 @@ const get: Command = {
           { name: "Standard Acc", value: "standard_acc" },
           { name: "Tech Acc", value: "tech_acc" }
         )
+    )
+    .addStringOption((option) =>
+      option
+        .setName("mode")
+        .setDescription("Score display mode (default: Top)")
+        .setRequired(false)
+        .addChoices(
+          { name: "Top", value: "top" },
+          { name: "Recent", value: "recent" }
+        )
     ),
 
   async execute(interaction) {
@@ -42,6 +52,7 @@ const get: Command = {
     let userId = interaction.options.getString("user-id");
     const categoryCode =
       interaction.options.getString("category") ?? "overall";
+    const mode = interaction.options.getString("mode") ?? "top";
 
     if (!userId) {
       try {
@@ -72,7 +83,7 @@ const get: Command = {
 
     const scoresParams: { size: number; sort: string; categoryId?: string } = {
       size: 5,
-      sort: "weightedAp,desc",
+      sort: mode === "recent" ? "timeSet,desc" : "weightedAp,desc",
     };
     if (targetCat && categoryCode !== "overall") {
       scoresParams.categoryId = targetCat.id;
@@ -136,6 +147,7 @@ const get: Command = {
       stats: categoryStats,
       diff,
       topScores: scores?.content ?? [],
+      scoresLabel: mode === "recent" ? "RECENT SCORES" : "TOP SCORES",
       categoryIdToCode,
     });
 
