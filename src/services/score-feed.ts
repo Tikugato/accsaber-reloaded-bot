@@ -419,10 +419,19 @@ export class ScoreFeed {
 
     if (crossed.length === 0) return null;
 
-    const best = crossed[0];
+    const best = crossed.find((t) => {
+      const k = `${score.userId}:${catConfig.categoryCode}:${t.rank}`;
+      return !this.topRankAnnounced.has(k);
+    });
+    if (!best) return null;
+
     const key = `${score.userId}:${catConfig.categoryCode}:${best.rank}`;
-    if (this.topRankAnnounced.has(key)) return null;
     this.topRankAnnounced.add(key);
+    for (const t of crossed) {
+      if (t.rank > best.rank) {
+        this.topRankAnnounced.add(`${score.userId}:${catConfig.categoryCode}:${t.rank}`);
+      }
+    }
 
     const vars = {
       ...commonVars(score, catName),
