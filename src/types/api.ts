@@ -67,6 +67,7 @@ export interface UserCategoryStatisticsResponse {
   scoreXp: number;
   topPlayId: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface MapDifficultyResponse {

@@ -42,8 +42,8 @@ async function resolveCategory(categoryId: string) {
   return { code, name };
 }
 
-const STATS_POLL_INTERVAL = 3_000;
-const STATS_POLL_MAX_ATTEMPTS = 15;
+const STATS_POLL_INTERVAL = 300;
+const STATS_POLL_MAX_ATTEMPTS = 20;
 
 async function waitForFreshStats(
   userId: string,
@@ -51,14 +51,18 @@ async function waitForFreshStats(
   scoreCreatedAt: string
 ): Promise<UserCategoryStatisticsResponse> {
   const scoreTime = new Date(scoreCreatedAt).getTime();
+  let last: UserCategoryStatisticsResponse | null = null;
 
   for (let i = 0; i < STATS_POLL_MAX_ATTEMPTS; i++) {
     const stats = await getUserCategoryStatistics(userId, categoryCode);
-    if (new Date(stats.createdAt).getTime() >= scoreTime) return stats;
+    last = stats;
+    const createdAt = new Date(stats.createdAt).getTime();
+    const updatedAt = new Date(stats.updatedAt).getTime();
+    if (createdAt >= scoreTime && updatedAt > createdAt) return stats;
     await new Promise((r) => setTimeout(r, STATS_POLL_INTERVAL));
   }
 
-  return getUserCategoryStatistics(userId, categoryCode);
+  return last ?? getUserCategoryStatistics(userId, categoryCode);
 }
 
 export class ScoreFeed {
