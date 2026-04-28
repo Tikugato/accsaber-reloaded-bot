@@ -34,8 +34,8 @@ export const CATEGORY_LABEL: Record<string, string> = {
   low_mid: "Low Mid",
 };
 
-export const SANS = '"Inter", "Noto Sans JP", "Segoe UI", sans-serif';
-export const MONO = '"Cascadia", "Cascadia Code", "Noto Sans JP", "Consolas", monospace';
+export const SANS = '"DM Sans", "Noto Sans JP", system-ui, -apple-system, sans-serif';
+export const MONO = '"Poppins", "Noto Sans JP", system-ui, sans-serif';
 
 let fontsRegistered = false;
 
@@ -46,9 +46,12 @@ export function registerFonts(): void {
     const path = join(FONTS_DIR, file);
     if (existsSync(path)) GlobalFonts.registerFromPath(path, family);
   };
-  register("Inter.ttf", "Inter");
-  register("CascadiaCode-Regular.ttf", "Cascadia");
-  register("CascadiaCode-Bold.ttf", "Cascadia");
+  register("DMSans-Regular.ttf", "DM Sans");
+  register("DMSans-Medium.ttf", "DM Sans");
+  register("DMSans-Bold.ttf", "DM Sans");
+  register("Poppins-Regular.ttf", "Poppins");
+  register("Poppins-Medium.ttf", "Poppins");
+  register("Poppins-Bold.ttf", "Poppins");
   register("NotoSansJP.ttf", "Noto Sans JP");
 }
 
