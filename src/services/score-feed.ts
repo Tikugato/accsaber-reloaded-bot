@@ -408,6 +408,17 @@ export class ScoreFeed {
     const previousRank = diff ? currentRank - diff.rankingDiff : currentRank;
     if (currentRank === previousRank) return null;
 
+    const keyPrefix = `${score.userId}:${catConfig.categoryCode}:`;
+    for (const key of this.topRankAnnounced) {
+      if (!key.startsWith(keyPrefix)) continue;
+      const rest = key.slice(keyPrefix.length);
+      const rankStr = rest.startsWith("detail:") ? rest.slice(7) : rest;
+      const rank = Number(rankStr);
+      if (Number.isFinite(rank) && previousRank > rank) {
+        this.topRankAnnounced.delete(key);
+      }
+    }
+
     const catName = catConfig.categoryCode === "overall"
       ? "Overall"
       : (await getCategoryNameById(stats.categoryId)) ?? catConfig.categoryCode;
