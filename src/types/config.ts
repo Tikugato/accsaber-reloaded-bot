@@ -78,6 +78,44 @@ export interface ScoreFeedConfig {
   streak: StreakConfig;
 }
 
+export interface MilestoneFirstRuleConfig {
+  enabled: boolean;
+  messageTemplate: string;
+  color: string;
+}
+
+export interface MilestoneRareRuleConfig {
+  enabled: boolean;
+  percentageThreshold: number;
+  minPlayersToCount: number;
+  messageTemplate: string;
+  subtitleTemplate: string;
+  color: string;
+}
+
+export interface MilestoneDiamondPlusRuleConfig {
+  enabled: boolean;
+  tiers: string[];
+  messageTemplate: string;
+  color: string;
+}
+
+export interface MilestoneFeedRulesConfig {
+  firstCompletion: MilestoneFirstRuleConfig;
+  rare: MilestoneRareRuleConfig;
+  diamondPlus: MilestoneDiamondPlusRuleConfig;
+}
+
+export interface MilestoneFeedConfig {
+  enabled: boolean;
+  channelId: string;
+  wsUrl?: string | null;
+  rules: MilestoneFeedRulesConfig;
+  completionStatsTtlSeconds: number;
+  maxMilestonesPerPayload?: number;
+  maxCompletedAgeSeconds?: number;
+}
+
 export interface LevelTierRoles {
   newcomer: string;
   apprentice: string;
@@ -117,4 +155,5 @@ export interface Config {
   };
   reactionRoles?: ReactionRolesConfig;
   scoreFeed?: ScoreFeedConfig;
+  milestoneFeed?: MilestoneFeedConfig;
 }

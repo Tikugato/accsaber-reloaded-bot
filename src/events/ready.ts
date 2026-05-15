@@ -2,6 +2,8 @@ import { Events } from "discord.js";
 import { getCategories } from "../api/categories.js";
 import type { ArBot } from "../client.js";
 import { config } from "../config.js";
+import { MilestoneFeed } from "../services/milestone-feed.js";
+import { MilestoneWebSocket } from "../services/milestone-ws.js";
 import { ScoreFeed } from "../services/score-feed.js";
 import { ScoreWebSocket } from "../services/score-ws.js";
 import { publishRoleMessage } from "./reaction-roles.js";
@@ -35,6 +37,19 @@ export default {
       ws.connect();
       client.scoreWs = ws;
       console.log("[ScoreFeed] Score feed started");
+    }
+
+    if (config.milestoneFeed?.enabled) {
+      const feed = new MilestoneFeed(client);
+      const ws = new MilestoneWebSocket();
+      ws.onMilestone((payload) => {
+        feed.handlePayload(payload).catch((err) => {
+          console.error("[MilestoneFeed] Error handling payload:", err);
+        });
+      });
+      ws.connect();
+      client.milestoneWs = ws;
+      console.log("[MilestoneFeed] Milestone feed started");
     }
   },
 };

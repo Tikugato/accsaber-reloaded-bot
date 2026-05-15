@@ -14,6 +14,18 @@ function loadConfig(): Config {
   if (!parsed.api?.baseUrl) required.push("api.baseUrl");
   if (!parsed.roles?.levelTiers) required.push("roles.levelTiers");
 
+  if (parsed.milestoneFeed) {
+    const mf = parsed.milestoneFeed;
+    if (!mf.channelId) required.push("milestoneFeed.channelId");
+    if (!mf.rules) required.push("milestoneFeed.rules");
+    if (!mf.rules?.firstCompletion) required.push("milestoneFeed.rules.firstCompletion");
+    if (!mf.rules?.rare) required.push("milestoneFeed.rules.rare");
+    if (!mf.rules?.diamondPlus) required.push("milestoneFeed.rules.diamondPlus");
+    if (mf.completionStatsTtlSeconds === undefined) {
+      required.push("milestoneFeed.completionStatsTtlSeconds");
+    }
+  }
+
   if (required.length > 0) {
     throw new Error(`Missing required config fields: ${required.join(", ")}`);
   }

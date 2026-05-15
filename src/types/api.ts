@@ -147,3 +147,65 @@ export interface UserAllStatisticsResponse {
   totalMilestoneSetBonusXp: number;
   categories: UserCategoryStatisticsResponse[];
 }
+
+export type MilestoneTier =
+  | "bronze"
+  | "silver"
+  | "gold"
+  | "platinum"
+  | "diamond"
+  | "apex";
+
+export type MilestoneType = "milestone" | "achievement";
+
+export interface MilestonePayloadEntry {
+  id: string;
+  setId: string;
+  categoryId: string | null;
+  title: string;
+  description: string;
+  type: MilestoneType;
+  tier: MilestoneTier;
+  xp: number;
+  awardsItemId: string | null;
+}
+
+export interface MilestoneSetPayloadEntry {
+  id: string;
+  title: string;
+  description: string;
+  bonusXp: number;
+  awardsItemId: string | null;
+}
+
+export interface MilestoneCompletedPayload {
+  userId: string;
+  userName: string;
+  userCountry: string;
+  userAvatarUrl: string;
+  completedAt: string;
+  milestones?: MilestonePayloadEntry[];
+  sets?: MilestoneSetPayloadEntry[];
+}
+
+export interface MilestoneCompletionResponse {
+  id: string;
+  setId: string;
+  categoryId: string | null;
+  title: string;
+  description: string;
+  type: MilestoneType;
+  tier: MilestoneTier;
+  xp: number;
+  completions: number;
+  totalPlayers: number;
+  completionPercentage: number;
+}
+
+export interface MilestoneHolderResponse {
+  userId: string;
+  userName: string;
+  avatarUrl: string;
+  country: string;
+  completedAt: string;
+}

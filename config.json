@@ -155,6 +155,35 @@
       "messageTemplate": "Hit a {streak115} note 115 streak on {songName}!"
     }
   },
+  "milestoneFeed": {
+    "enabled": true,
+    "channelId": "1504804880991125594",
+    "wsUrl": null,
+    "completionStatsTtlSeconds": 300,
+    "maxMilestonesPerPayload": 5,
+    "maxCompletedAgeSeconds": 600,
+    "rules": {
+      "firstCompletion": {
+        "enabled": true,
+        "messageTemplate": "Was the FIRST EVER to unlock the following {milestoneType}!",
+        "color": "#FFD700"
+      },
+      "rare": {
+        "enabled": true,
+        "percentageThreshold": 1.0,
+        "minPlayersToCount": 100,
+        "messageTemplate": "Just unlocked a rare {milestoneType}!",
+        "subtitleTemplate": "Only {percentage}% of players have this",
+        "color": "#9B59B6"
+      },
+      "diamondPlus": {
+        "enabled": true,
+        "tiers": ["diamond", "apex"],
+        "messageTemplate": "Just unlocked a {tier} tier {milestoneType}!",
+        "color": "#5DADE2"
+      }
+    }
+  },
   "reactionRoles": {
     "channelId": "1484645896997175507",
     "roles": {
