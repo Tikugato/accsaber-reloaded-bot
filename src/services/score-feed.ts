@@ -414,7 +414,7 @@ export class ScoreFeed {
       const rest = key.slice(keyPrefix.length);
       const rankStr = rest.startsWith("detail:") ? rest.slice(7) : rest;
       const rank = Number(rankStr);
-      if (Number.isFinite(rank) && previousRank > rank) {
+      if (Number.isFinite(rank) && currentRank > rank) {
         this.topRankAnnounced.delete(key);
       }
     }
